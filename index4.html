@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js 라이브러리 추가 -->
+  <style>
+    .container {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    .input-table {
+      border-collapse: collapse;
+      width: 200px;
+    }
+
+    .input-table th,
+    .input-table td {
+      border: 1px solid darkgray;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .input-table input {
+      width: 120px;
+    }
+
+    .input-table th {
+      background-color: darkgray;
+      font-weight: bold;
+    }
+
+    #myChart {
+      width: 500px;
+      height: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div>
+
+
+      <table class="input-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>평균 기온</th>
+            <th>평균 습도</th>
+          </tr>
+        </thead>
+        <tbody>
+          <script>
+            const months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+            const tempTemperature = [4.5, 5.2, 8.7, 14.4, 18.9, 22.7, 26.3, 27.8, 24.1, 18.1, 12.2, 7];
+            const tempHummid = [64, 61, 59, 60, 65, 71, 74, 70, 71, 68, 66, 65];
+            document.write(months.map((month, index) => `
+                        <tr>
+                            <td>${month}월</td>
+                            <td><input type="number" id="tempInput${index}" placeholder="Temperature" value="${tempTemperature[index]}" oninput="updateChart(${index}, 'temp')" /></td>
+                            <td><input type="number" id="humidityInput${index}" placeholder="Humidity" value="${tempHummid[index]}" oninput="updateChart(${index}, 'humidity')" /></td>
+                        </tr>
+                    `).join(''));
+          </script>
+        </tbody>
+      </table>
+      <button class="randomBtn" onclick="updateChart(-1, '')">랜덤 데이터 생성</button>
+    </div>
+
+    <canvas id="myChart"></canvas>
+  </div>
+
+</body>
+<script>
+  const ctx = document.getElementById('myChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+      datasets: [
+        {
+          label: '평균 기온',
+          data: tempTemperature,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          fill: false,
+          yAxisID: 'y1',
+          pointStyle: false,
+        },
+        {
+          label: '평균 습도',
+          data: tempHummid,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          fill: false,
+          yAxisID: 'y2',
+          pointStyle: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y1: {
+          type: 'linear',
+          position: 'left',
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: '평균기온 (°C)'
+          }
+        },
+        y2: {
+          type: 'linear',
+          position: 'right',
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: '평균습도 (%)'
+          },
+          grid: {
+            drawOnChartArea: false
+          }
+        }
+      }
+    }
+  });
+
+  let button = document.querySelector(".randomBtn");
+
+  const updateChart = (monthIndex, type) => {
+
+    if (monthIndex === -1) {
+      for (var i = 0; i < 12; i++) { 
+        let n = Math.floor(Math.random() * 30); 
+        chart.data.datasets[0].data[i] = n;
+      }
+
+      for (var i = 0; i < 12; i++) { 
+        let n = Math.floor(Math.random() * 80); 
+        chart.data.datasets[1].data[i] = n;
+      }
+
+    } else {
+      const tempInput = document.getElementById(`tempInput${monthIndex}`);
+      const humidityInput = document.getElementById(`humidityInput${monthIndex}`);
+
+      if (type === 'temp') {
+        const tempValue = parseFloat(tempInput.value);
+        chart.data.datasets[0].data[monthIndex] = !isNaN(tempValue) ? tempValue : null;
+      } else if (type === 'humidity') {
+        const humidityValue = parseFloat(humidityInput.value);
+        chart.data.datasets[1].data[monthIndex] = !isNaN(humidityValue) ? humidityValue : null;
+      }
+    }
+
+
+
+    chart.update();
+  }
+
+</script>
+
+</html>
